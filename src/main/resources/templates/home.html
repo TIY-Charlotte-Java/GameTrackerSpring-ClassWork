@@ -42,14 +42,29 @@ Welcome, {{name}}!
         <option value="xbone">XBox One</option>
         <option value="wiiu">Wii U</option>
     </select>
+
+
     <input type="number" placeholder="Release Year" name="gameYear"/>
     <button type="submit">Add Game</button>
 </form>
 {{/user}}
 
+<select name="name">
+{{#users}}
+    <option value="{{name}}">{{name}}</option>
+{{/users}}
+</select>
+
+
+<form action="/edit-game" method="post">
+    <input type="number" name="messageId"/>
+    <input type="text" name="message" />
+
+    <input type="submit" />
+</form>
 <ol>
     {{#games}}
-    <li>{{name}} {{genre}} {{platform}} {{releaseYear}}</li>
+    <li>{{id}} {{name}} {{genre}} {{platform}} {{releaseYear}}</li>
     {{/games}}
 </ol>
 </body>

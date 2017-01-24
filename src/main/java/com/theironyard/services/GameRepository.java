@@ -1,6 +1,8 @@
-package com.example.server;
+package com.theironyard.services;
 
 
+import com.theironyard.entities.Game;
+import com.theironyard.entities.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

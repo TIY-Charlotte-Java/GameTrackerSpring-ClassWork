@@ -1,6 +1,11 @@
-package com.example.server;
+package com.theironyard.controllers;
 
 
+import com.theironyard.entities.Game;
+import com.theironyard.entities.User;
+import com.theironyard.services.GameRepository;
+import com.theironyard.services.UserRepository;
+import com.theironyard.utilities.PasswordStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,8 +28,14 @@ public class GameTrackerSpringController {
     public void init() {
         if (users.count() == 0) {
             User user = new User();
-            user.name = "Zach";
-            user.password = "hunter2";
+            user.setName("Zach");
+
+            try {
+                user.setPassword(PasswordStorage.createHash("hunter2"));
+            } catch (PasswordStorage.CannotPerformOperationException e) {
+                e.printStackTrace();
+            }
+
             users.save(user);
         }
     }
@@ -34,13 +45,12 @@ public class GameTrackerSpringController {
         User user = users.findFirstByName(userName);
 
         if (user == null) {
-            user = new User(userName, password);
+            user = new User(userName, PasswordStorage.createHash(password));
             users.save(user);
         }
-        else if (!password.equals(user.password)) {
+        else if (!PasswordStorage.verifyPassword(password, user.getPassword())) {
             throw new Exception("Incorrect password");
         }
-
         session.setAttribute("userName", userName);
         return "redirect:/";
     }
@@ -52,7 +62,7 @@ public class GameTrackerSpringController {
     }
 
     @RequestMapping(path = "/", method = RequestMethod.GET)
-    public String home(HttpSession session, Model model, String genre, Integer releaseYear) {
+        public String home(HttpSession session, Model model, String genre, Integer releaseYear) {
 
         String userName = (String) session.getAttribute("userName");
         User user = users.findFirstByName(userName);
@@ -67,10 +77,11 @@ public class GameTrackerSpringController {
             } else if (releaseYear != null) {
                 gameList = games.findByReleaseYear(releaseYear);
             } else {
-                gameList = user.games;
+                gameList = user.getGames();
             }
 
             model.addAttribute("games", gameList);
+            model.addAttribute("users", users.findAll());
         }
 
         return "home";
@@ -85,4 +96,5 @@ public class GameTrackerSpringController {
         users.save(user);
         return "redirect:/";
     }
+
 }
